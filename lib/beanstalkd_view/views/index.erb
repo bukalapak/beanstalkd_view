@@ -19,14 +19,25 @@
         <thead>
           <tr>
             <th>Tubes</th>
+            <th>Urgent</th>
+            <th>Ready</th>
+            <th>Buried</th>
+            <th>Delayed</th>
           </tr>
         </thead>
         <tbody>
         <% tube_names = [] %>
-		    <% @tubes.each do |tube| %>
+        <% @tubes.sort! do |a, b|
+          [b.stats[:current_jobs_urgent], b.stats[:current_jobs_ready], b.stats[:current_jobs_buried], b.stats[:current_jobs_delayed]] <=>
+          [a.stats[:current_jobs_urgent], a.stats[:current_jobs_ready], a.stats[:current_jobs_buried], a.stats[:current_jobs_delayed]]
+        end.each do |tube| %>
           <% tube_names << tube.name.strip %>
   		    <tr>
   			    <td><a href="<%= u("/tube/#{CGI::escape(tube.name)}") %>"><%= tube.name %></a></td>
+            <td><%= tube.stats[:current_jobs_urgent] %></td>
+            <td><%= tube.stats[:current_jobs_ready] %></td>
+            <td><%= tube.stats[:current_jobs_buried] %></td>
+            <td><%= tube.stats[:current_jobs_delayed] %></td>
   		    </tr>
 		    <% end %>
 		    </tbody>
