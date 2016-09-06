@@ -12,6 +12,7 @@ module BeanstalkdView
       @@beanstalks ||= begin
         hash = {}
         beanstalk_addresses.each do |address|
+          puts "connecting: #{address}"
           hash[address] = Beaneater.new(address)
         end
         hash
