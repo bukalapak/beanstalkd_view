@@ -15,8 +15,8 @@ module BeanstalkdView
     set :static, true
 
     before do
-      @active_beanstalk = cookies[:beanstalk]
       @beanstalk_urls = beanstalk_addresses
+      @active_beanstalk = beanstalk_addresses.include?(cookies[:beanstalk]) ? cookies[:beanstalk] : nil
     end
 
     get "/" do

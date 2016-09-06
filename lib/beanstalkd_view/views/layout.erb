@@ -13,7 +13,7 @@
 	  <div class="navbar-inner">
 	    <div class="container">
 			<a class="brand" href="<%= u("/") %>">Beanstalkd View - <%= BeanstalkdView::VERSION %></a>
-      <form action="/change_connection" method="POST">
+      <form action="<%= u("/change_connection") %>" method="POST" class="brand">
         <select id="connection-select" name="beanstalk">
           <% @beanstalk_urls.each do |url| %>
             <option value="<%= url %>" <%= (url == cookies[:beanstalk]) ? "selected" : "" %>><%= url %></option>
@@ -21,7 +21,7 @@
         </select> 
         <button type='submit'>go</button>
       </form>
-		</div>
+		  </div>
 	  </div>
 	</div>
 	
