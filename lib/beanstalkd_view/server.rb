@@ -24,6 +24,9 @@ module BeanstalkdView
         @connection = beanstalk.connection
         @tubes = beanstalk.tubes.all
         @tubes = @tubes.sort_by{|obj| obj.name }
+        @tube_stats = @tubes.map do |tube|
+          [tube, tube.stats]
+        end
         @stats = beanstalk.stats
         chart_data = get_chart_data_hash(@tubes)
         @total_jobs_data = chart_data["total_jobs_data"]
