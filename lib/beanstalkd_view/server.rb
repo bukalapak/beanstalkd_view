@@ -14,6 +14,11 @@ module BeanstalkdView
     end
     set :static, true
 
+    before do
+      active_beanstalk = cookies[:beanstalk]
+      @beanstalk_urls = beanstalk_addresses
+    end
+
     get "/" do
       begin
         @connection = beanstalk.connection
@@ -30,6 +35,11 @@ module BeanstalkdView
         close_connection
         erb :error
       end
+    end
+
+    post "/change_connection" do
+      cookies[:beanstalk] = params["beanstalk"]
+      redirect back
     end
 
     post "/add_job" do

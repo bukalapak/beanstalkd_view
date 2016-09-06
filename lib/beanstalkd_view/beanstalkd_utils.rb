@@ -1,23 +1,38 @@
 module BeanstalkdView
-    
+
   module BeanstalkdUtils
-    
+
     GUESS_PEEK_RANGE = 100 # Default number of elements to use in peek-range guesses
 
     class BadURL < RuntimeError; end
-    
-    def beanstalk
-      @@beanstalk ||= Beaneater.new(beanstalk_address)
+
+    attr_writer :active_beanstalk
+
+    def beanstalk(address = active_beanstalk)
+      @@beanstalks ||= begin
+        hash = {}
+        beanstalk_addresses.each do |address|
+          hash[address] = Beaneater.new(address)
+        end
+        hash
+      end
+      @@beanstalks[address]
     end
 
-    def beanstalk_url
-      return @@url if defined?(@@url) and @@url
-      ENV['BEANSTALK_URL'] || 'beanstalk://127.0.0.1/'
+    def active_beanstalk
+      @active_beanstalk ? @active_beanstalk : beanstalk_addresses.first
     end
 
-    def beanstalk_address
-      uris = beanstalk_url.split(/[\s,]+/)
-      beanstalk_host_and_port(uris.first)
+    def beanstalk_urls
+      ENV['BEANSTALK_URLS'] ? ENV['BEANSTALK_URLS'].split(',') : ['beanstalk://127.0.0.1/']
+    end
+
+    def beanstalk_addresses
+      beanstalk_urls.map do |url|
+        url.split(/[\s,]+/)
+      end.map do |uri|
+        beanstalk_host_and_port(uri.first)
+      end
     end
 
     def beanstalk_host_and_port(uri_string)
@@ -34,14 +49,14 @@ module BeanstalkdView
       ret_value['body'] = job.body.inspect
       ret_value
     end
-        
+
     # Return the stats data in a format for the Bluff JS UI Charts
     def get_chart_data_hash(tubes)
       chart_data = {}
       chart_data["total_jobs_data"] = Hash.new
       chart_data["buried_jobs_data"] = Hash.new
       chart_data["total_jobs_data"]["items"] = Array.new
-      chart_data["buried_jobs_data"]["items"] = Array.new 
+      chart_data["buried_jobs_data"]["items"] = Array.new
       tubes.each do |tube|
         stats = tube.stats
         add_chart_data_to_hash(tube, stats[:total_jobs], chart_data["total_jobs_data"]["items"])
@@ -58,7 +73,7 @@ module BeanstalkdView
         items << datum
       end
     end
-    
+
     # Pick a Minimum Peek Range Based on minumum ready jobs on all tubes
     def guess_min_peek_range(tubes)
       min = 0
@@ -76,7 +91,7 @@ module BeanstalkdView
       jitter_min = (min-(GUESS_PEEK_RANGE*0.25)).to_i
       [1, jitter_min].max
     end
-    
+
     # Pick a Minimum Peek Range Based on the minimum
     def guess_max_peek_range(min)
       (min+GUESS_PEEK_RANGE)-1
