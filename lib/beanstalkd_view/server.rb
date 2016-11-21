@@ -182,7 +182,10 @@ module BeanstalkdView
         if allowed_states.include?(params[:state])
           tube = beanstalk.tubes[params[:tube]]
           while job = tube.peek(params[:state].to_sym)
-            job.delete
+            begin
+              job.delete
+            rescue Beaneater::NotFoundError => @error
+            end
           end
           cookies[:beanstalkd_view_notice] = "Cleared all #{params[:state]} jobs from #{params[:tube]}."
         else
