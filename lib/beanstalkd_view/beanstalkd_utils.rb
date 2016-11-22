@@ -25,7 +25,9 @@ module BeanstalkdView
     end
 
     def beanstalk_urls
-      ENV['BEANSTALK_URLS'] ? ENV['BEANSTALK_URLS'].split(',') : ['beanstalk://127.0.0.1/']
+      queue_urls  = ENV['BEANSTALK_URLS'] ? ENV['BEANSTALK_URLS'].split(',').map(&:strip).reject(&:empty?) : ['beanstalk://127.0.0.1/']
+      worker_urls = ENV['BEANSTALK_WORKER_URLS'] ? ENV['BEANSTALK_WORKER_URLS'].split(',').map(&:strip).reject(&:empty?) : ['beanstalk://127.0.0.1/']
+      (queue_urls + worker_urls).uniq.sort
     end
 
     def beanstalk_addresses
